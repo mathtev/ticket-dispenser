@@ -6,7 +6,7 @@ class Application(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
-        self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
+        self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold")
 
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
@@ -37,13 +37,15 @@ class MainWindow(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-       
-        label1 = tk.Label(self, text="20-minutowy\nNormalny", font=controller.title_font)
-        label2 = tk.Label(self, text="40-minutowy\nNormalny", font=controller.title_font)
-        label3 = tk.Label(self, text="60-minutowy\nNormalny", font=controller.title_font)
-        label4 = tk.Label(self, text="20-minutowy\nUlgowy", font=controller.title_font)
-        label5 = tk.Label(self, text="40-minutowy\nUlgowy", font=controller.title_font)
-        label6 = tk.Label(self, text="60-minutowy\nUlgowy", font=controller.title_font)
+
+        self.main_font = tkfont.Font(family='Helvetica', size=18, weight="bold")
+        
+        label1 = tk.Label(self, width=20, text="20-minutowy\nNormalny                  20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
+        label2 = tk.Label(self, width=20, text="40-minutowy\nNormalny                  20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
+        label3 = tk.Label(self, width=20, text="60-minutowy\nNormalny                  20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
+        label4 = tk.Label(self, width=20, text="20-minutowy\nUlgowy                     20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
+        label5 = tk.Label(self, width=20, text="40-minutowy\nUlgowy                     20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
+        label6 = tk.Label(self, width=20, text="60-minutowy\nUlgowy                     20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
 
         label1.grid(row=0, column=0)
         label2.grid(row=1, column=0)
