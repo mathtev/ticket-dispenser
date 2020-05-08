@@ -1,34 +1,34 @@
 Opis zadania
-? Automat przechowuje informacje o monetach/banknotach znajduj¹cych siê w
-nim (1, 2, 5, 10, 20, 50gr, 1, 2, 5, 10, 20, 50z³) [dziedziczenie: mo¿na napisaæ
-uniwersaln¹ klasê PrzechowywaczMonet po której dziedziczyæ bêdzie automat]
-? Okno z list¹ biletów w ró¿nych cenach (jako przyciski). Wymagane bilety:
+â—‹ Automat przechowuje informacje o monetach/banknotach znajdujÄ…cych siÄ™ w
+nim (1, 2, 5, 10, 20, 50gr, 1, 2, 5, 10, 20, 50zÅ‚) [dziedziczenie: moÅ¼na napisaÄ‡
+uniwersalnÄ… klasÄ™ PrzechowywaczMonet po ktÃ³rej dziedziczyÄ‡ bÄ™dzie automat]
+â—‹ Okno z listÄ… biletÃ³w w rÃ³Å¼nych cenach (jako przyciski). Wymagane bilety:
 20-minutowy, 40-minutowy, 60-minutowy w wariantach normalnym i ulgowym.
-? Mo¿liwoœæ wybrania wiêcej ni¿ jednego rodzaju biletu. Mo¿liwoœæ
-wprowadzenia liczby biletów.
-? Po wybraniu biletu pojawia siê okno z list¹ monet (przyciski) oraz
-mo¿liwoœci¹ dodania kolejnego biletu lub liczby biletów.
-? Interfejs ma dodatkowo zawieraæ pole na wybór liczby wrzucanych
-monet (domyœlnie jedna).
-? Po wrzuceniu monet, których wartoœæ jest wiêksza lub równa cenie
-wybranych biletów, automat sprawdza czy mo¿e wydaæ resztê.
-? Brak reszty/mo¿e wydaæ: wyskakuje okienko z informacj¹ o zakupach, wydaje
-resztê (dolicza wrzucone monety, odlicza wydane jako reszta), wraca do
-wyboru biletów.
-? Nie mo¿e wydaæ: wyskakuje okienko z napisem "Tylko odliczona kwota"
-oraz zwraca w³o¿one monety.
+â—‹ MoÅ¼liwoÅ›Ä‡ wybrania wiÄ™cej niÅ¼ jednego rodzaju biletu. MoÅ¼liwoÅ›Ä‡
+wprowadzenia liczby biletÃ³w.
+â—‹ Po wybraniu biletu pojawia siÄ™ okno z listÄ… monet (przyciski) oraz
+moÅ¼liwoÅ›ciÄ… dodania kolejnego biletu lub liczby biletÃ³w.
+â—‹ Interfejs ma dodatkowo zawieraÄ‡ pole na wybÃ³r liczby wrzucanych
+monet (domyÅ›lnie jedna).
+â—‹ Po wrzuceniu monet, ktÃ³rych wartoÅ›Ä‡ jest wiÄ™ksza lub rÃ³wna cenie
+wybranych biletÃ³w, automat sprawdza czy moÅ¼e wydaÄ‡ resztÄ™.
+â–  Brak reszty/moÅ¼e wydaÄ‡: wyskakuje okienko z informacjÄ… o zakupach, wydaje
+resztÄ™ (dolicza wrzucone monety, odlicza wydane jako reszta), wraca do
+wyboru biletÃ³w.
+â–  Nie moÅ¼e wydaÄ‡: wyskakuje okienko z napisem "Tylko odliczona kwota"
+oraz zwraca wÅ‚oÅ¼one monety.
 Testy
-1. Bilet kupiony za odliczon¹ kwotê - oczekiwany brak reszty.
-2. Bilet kupiony p³ac¹c wiêcej - oczekiwana reszta.
-3. Bilet kupiony p³ac¹c wiêcej, automat nie ma jak wydaæ reszty - oczekiwana
-informacja o b³êdzie oraz zwrócenie takiej samej liczby monet o tych
-samych nomina³ach, co wrzucone.
-4. Zakup biletu p³ac¹c po 1gr - suma stu monet 1gr ma byæ równa 1z³ (dla floatów
-suma sto razy 0.01+0.01+...+0.01 nie bêdzie równa 1.0). P³atnoœci mo¿na dokonaæ
-za pomoc¹ pêtli for w interpreterze.
-5. Zakup dwóch ró¿nych biletów naraz - cena powinna byæ sum¹.
+1. Bilet kupiony za odliczonÄ… kwotÄ™ - oczekiwany brak reszty.
+2. Bilet kupiony pÅ‚acÄ…c wiÄ™cej - oczekiwana reszta.
+3. Bilet kupiony pÅ‚acÄ…c wiÄ™cej, automat nie ma jak wydaÄ‡ reszty - oczekiwana
+informacja o bÅ‚Ä™dzie oraz zwrÃ³cenie takiej samej liczby monet o tych
+samych nominaÅ‚ach, co wrzucone.
+4. Zakup biletu pÅ‚acÄ…c po 1gr - suma stu monet 1gr ma byÄ‡ rÃ³wna 1zÅ‚ (dla floatÃ³w
+suma sto razy 0.01+0.01+...+0.01 nie bÄ™dzie rÃ³wna 1.0). PÅ‚atnoÅ›ci moÅ¼na dokonaÄ‡
+za pomocÄ… pÄ™tli for w interpreterze.
+5. Zakup dwÃ³ch rÃ³Å¼nych biletÃ³w naraz - cena powinna byÄ‡ sumÄ….
 6. Dodanie biletu, wrzucenie kilku monet, dodanie drugiego biletu, wrzucenie
-pozosta³ych monet, zakup za odliczon¹ kwotê - oczekiwany brak reszty
-(wrzucone monety nie zeruj¹ siê po dodaniu biletu).
-7. Próba wrzucenia ujemnej oraz nieca³kowitej liczby monet (oczekiwany komunikat
-o b³êdzie).
+pozostaÅ‚ych monet, zakup za odliczonÄ… kwotÄ™ - oczekiwany brak reszty
+(wrzucone monety nie zerujÄ… siÄ™ po dodaniu biletu).
+7. PrÃ³ba wrzucenia ujemnej oraz niecaÅ‚kowitej liczby monet (oczekiwany komunikat
+o bÅ‚Ä™dzie).
