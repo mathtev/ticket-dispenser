@@ -48,3 +48,5 @@ pozostałych monet, zakup za odliczoną kwotę - oczekiwany brak reszty
 
 7. Próba wrzucenia ujemnej oraz niecałkowitej liczby monet (oczekiwany komunikat
 o błędzie).
+
+https://github.com/mathtev/ticket-dispenser
