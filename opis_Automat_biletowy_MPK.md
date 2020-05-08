@@ -33,7 +33,6 @@ oraz zwraca włożone monety.
 2. Bilet kupiony płacąc więcej - oczekiwana reszta.
 
 3. Bilet kupiony płacąc więcej, automat nie ma jak wydać reszty - oczekiwana
-
 informacja o błędzie oraz zwrócenie takiej samej liczby monet o tych
 samych nominałach, co wrzucone.
 
