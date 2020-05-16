@@ -1,93 +1,130 @@
-import tkinter as tk
-from tkinter import font  as tkfont
+from decimal import Decimal, ROUND_HALF_UP
 
-class Application(tk.Tk):
-
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
-
-        self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold")
-
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both", expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
-        self.frames = {}
-        for F in (MainWindow, PageOne, PageTwo):
-            page_name = F.__name__
-            frame = F(parent=container, controller=self)
-            self.frames[page_name] = frame
-
-            # put all of the pages in the same location;
-            # the one on the top of the stacking order
-            # will be the one that is visible.
-            frame.grid(row=0, column=0, sticky="nsew")
-
-        self.show_frame("MainWindow")
-
-    def show_frame(self, page_name):
-        '''Show a frame for the given page name'''
-        frame = self.frames[page_name]
-        frame.tkraise()
+grosz = Decimal('.01')
+lista_nominalow = ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5','10','20','50']
+obslugiwane_nominaly = tuple(map(Decimal, lista_nominalow))
 
 
-class MainWindow(tk.Frame):
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-
-        self.main_font = tkfont.Font(family='Helvetica', size=18, weight="bold")
+class Error(Exception): 
+    pass
+  
+class NieznanaWalutaException(Error):
+    
+    def __init__(self, msg):
         
-        label1 = tk.Label(self, width=20, text="20-minutowy\nNormalny                  20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
-        label2 = tk.Label(self, width=20, text="40-minutowy\nNormalny                  20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
-        label3 = tk.Label(self, width=20, text="60-minutowy\nNormalny                  20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
-        label4 = tk.Label(self, width=20, text="20-minutowy\nUlgowy                     20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
-        label5 = tk.Label(self, width=20, text="40-minutowy\nUlgowy                     20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
-        label6 = tk.Label(self, width=20, text="60-minutowy\nUlgowy                     20 zł", font=self.main_font, fg="white", bg="blue", borderwidth=4, relief="groove", padx=5, pady=10, justify=tk.LEFT, anchor="w")
+        self.msg = msg 
 
-        label1.grid(row=0, column=0)
-        label2.grid(row=1, column=0)
-        label3.grid(row=2, column=0)
-        label4.grid(row=3, column=0)
-        label5.grid(row=4, column=0)
-        label6.grid(row=5, column=0)
-
-
-        button1 = tk.Button(self, text="Go to Page One",
-                            command=lambda: controller.show_frame("PageOne"))
-        button2 = tk.Button(self, text="Go to Page Two",
-                            command=lambda: controller.show_frame("PageTwo"))
+class ZlyNominalException(Error):
+    
+    def __init__(self, msg):
         
-        #button1.grid(row=0,column=1)
-        #button2.grid(row=1,column=2)
+        self.msg = msg
 
 
-class PageOne(tk.Frame):
+class Moneta:
+    
+    def __init__(self, nominal, waluta):
 
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        label = tk.Label(self, text="This is page 1", font=controller.title_font)
-        label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Go to the start page",
-                           command=lambda: controller.show_frame("MainWindow"))
-        button.pack()
+        nominal = Decimal(str(nominal))
+
+        try:
+            if nominal not in obslugiwane_nominaly:
+                raise(ZlyNominalException("Zły nominał"))
+            
+        except ZlyNominalException as err:
+            print(err.msg)
+            raise
+
+        else:
+            self._nominal = nominal
+            self.waluta = waluta
+
+    @property
+    def nominal(self):
+        return self._nominal.quantize(grosz, ROUND_HALF_UP)
+
+    @nominal.setter
+    def nominal(self, n):
+        self._nominal = Decimal(str(n))
+
+    def __str__(self):
+        return 'Moneta o wartości: {}, waluts: {}'.format(self.nominal, self.waluta)
+
+    def __repr__(self):
+        return 'Moneta({}, {})'.format(self.nominal, self.waluta)
+
+class PrzechowywaczMonet:
+    def __init__(self, obslugiwane_monety):
+        self._obslugiwane_monety = obslugiwane_monety
+        self._monety = []
+
+    def dodajMonete(self, m):
+        if isinstance(m,Moneta):
+            self._monety.append(m)
+        else:
+            print('Przesłany obiekt nie jest monetą')
+
+    def sumaMonet(self):
+        suma = Decimal('0')
+        for m in self._monety:
+            suma += m.nominal
+        return suma
+
+    def zwrocMonete(self, nom):
+
+        nom = Decimal(str(nom))
+        zwrotna = None
+
+        for m in self._monety:
+            if m.nominal == nom:
+                zwrotna = m
+                self._monety.remove(m)
+           
+        return zwrotna
 
 
-class PageTwo(tk.Frame):
+class Automat(PrzechowywaczMonet):
 
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        label = tk.Label(self, text="This is page 2", font=controller.title_font)
-        label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Go to the start page",
-                           command=lambda: controller.show_frame("MainWindow"))
-        button.pack()
+    obslugiwana_waluta = 'PLN'
+    ceny_biletow = tuple(map(Decimal, ['2.40','3.70','4.20','1.70','2.20','2.50']))
+    
+    def __init__(self, obslugiwane_monety):
+        super().__init__(obslugiwane_monety)
+        self.doZaplaty = Decimal('0')
+
+    def reset(self):
+        self.doZaplaty = Decimal('0')
+        self._monety.clear()
+
+    def dodajMonete(self, m):
+        
+        if isinstance(m,Moneta):
+            
+            try:
+                if m.waluta != self.obslugiwana_waluta:
+                    raise(NieznanaWalutaException("Nieznana waluta"))
+         
+            except NieznanaWalutaException as err:
+                print(err.msg)
+                raise
+
+            else:
+                self._monety.append(m)
+
+        else:
+            print('Przesłany obiekt nie jest monetą')
 
 
-if __name__ == "__main__":
-    app = Application()
-    app.mainloop()
+moneta1 = Moneta(1, 'PLN')
+moneta2 = Moneta(0.1, 'PLN')
+moneta3 = Moneta(0.05, 'PLN')
+automat = Automat(obslugiwane_nominaly)
+
+automat.dodajMonete(moneta1)
+automat.dodajMonete(moneta2)
+automat.dodajMonete(moneta3)
+
+print(moneta3.nominal)
+moneta3.nominal = 0.2
+print(moneta3.nominal)
+
