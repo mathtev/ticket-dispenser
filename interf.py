@@ -1,9 +1,9 @@
-from Automat import *
+import Automat as aut
 import tkinter as tk
 from tkinter import font  as tkfont
 
 
-automat = Automat(obslugiwane_nominaly)
+automat = aut.Automat(aut.obslugiwane_nominaly)
 
 
 class Application(tk.Tk):
@@ -63,7 +63,7 @@ class MainWindow(tk.Frame):
         lb_wybrane = []     #lista etykiet zawierających liczbę wybranych biletów
 
         lb_cena = tk.Label(self, text="Do zapłaty: %.2f" % automat.doZaplaty, font=self.main_font)
-        lb_cena.grid(row = 7, column = 2)
+        lb_cena.grid(row = 7, column = 2, columnspan=3)
 
         def update_price():
             lb_cena.config(text="Do zapłaty: %.2f" % automat.doZaplaty)
@@ -87,17 +87,17 @@ class MainWindow(tk.Frame):
             lb_wybrane.append(liczba)
 
         for i in range(lb):
-            plus = tk.Button(self, text = '+', command=lambda idx=i: plus_pressed(idx), pady=10, padx=10, font=self.main_font)
-            minus = tk.Button(self, text = '-', command=lambda idx=i: minus_pressed(idx), pady=10, padx=10, font=self.main_font)
+            plus = tk.Button(self, text = '+', command=lambda idx=i: plus_pressed(idx), pady=10, padx=20, font=self.main_font)
+            minus = tk.Button(self, text = '-', command=lambda idx=i: minus_pressed(idx), pady=10, padx=20, font=self.main_font)
 
-            plus.grid(row = i, column = 2,padx=30)
-            minus.grid(row = i, column = 4,padx=30)
+            plus.grid(row = i, column = 2,padx=30,sticky="we")
+            minus.grid(row = i, column = 4,padx=30,sticky="we")
 
 
         button1 = tk.Button(self, text="Kupuję i płacę", command=lambda: controller.show_frame("PageOne"), width=20, font=self.main_font, bg="green", fg="white")
         #button2 = tk.Button(self, text="Go to Page Two", command=lambda: controller.show_frame("PageTwo"))
         
-        button1.grid(row=6,column=0, columnspan=2, sticky="w")
+        button1.grid(row=7,column=0, columnspan=2, padx=10, pady=10, sticky="w")
         #button2.grid(row=1,column=2)
 
 

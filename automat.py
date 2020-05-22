@@ -1,4 +1,5 @@
 from decimal import Decimal, ROUND_HALF_UP
+import csv
 
 grosz = Decimal('.01')
 lista_nominalow = ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5','10','20','50']
@@ -8,17 +9,32 @@ obslugiwane_nominaly = tuple(map(Decimal, lista_nominalow))
 class Error(Exception): 
     pass
   
+
 class NieznanaWalutaException(Error):
     
     def __init__(self, msg):
         
         self.msg = msg 
 
-class ZlyNominalException(Error):
+class ListaMonetException(Error):
+    def __init__(self, msg):
+        
+        self.msg = msg
+
+    lista_monet = []
+
+class ZlyNominalException(ListaMonetException):
     
     def __init__(self, msg):
         
         self.msg = msg
+
+class ZlyFormatPlikuException(ListaMonetException):
+    
+    def __init__(self, msg):
+        
+        self.msg = msg
+
 
 
 class Moneta:
@@ -97,34 +113,64 @@ class Automat(PrzechowywaczMonet):
         self._monety.clear()
 
     def dodajMonete(self, m):
-        
-        if isinstance(m,Moneta):
-            
+        if isinstance(m,Moneta): 
             try:
                 if m.waluta != self.obslugiwana_waluta:
                     raise(NieznanaWalutaException("Nieznana waluta"))
-         
             except NieznanaWalutaException as err:
                 print(err.msg)
                 raise
-
             else:
                 self._monety.append(m)
-
         else:
             print('Przesłany obiekt nie jest monetą')
 
+        
+    def wczytaj_monety(self, waluta):
+        wczytane_monety = []
 
-moneta1 = Moneta(1, 'PLN')
-moneta2 = Moneta(0.1, 'PLN')
-moneta3 = Moneta(0.05, 'PLN')
+        try:
+            file = open('lista.csv', 'r')    
+            reader = csv.reader(file)
+            
+            for row in reader:
+
+                try:
+                    if len(row) != 2:
+                        raise(ZlyFormatPlikuException("Zła iczba kolumn w pliku"))
+                except ZlyFormatPlikuException as err:
+                    print(err.msg)
+                    raise err
+                else:
+                    nom = row[0]
+                    n = row[1]
+
+                try:
+                    if Decimal(nom) not in obslugiwane_nominaly:
+                        raise(ZlyNominalException("Nieobsługiwany nominał"))
+                except ZlyNominalException as err:
+                    print(err.msg)
+                    raise err
+                else:
+                    for i in range(int(n)):
+                        m = Moneta(nom,waluta)
+                        wczytane_monety.append(m)
+
+        except ListaMonetException as err:
+            print('błąd wczytywania')
+            wczytane_monety.clear()
+        else:
+            print('Sukces! Monety zostały wczytane')
+            wczytane_monety = sorted(wczytane_monety, key=lambda x: x.nominal)
+        finally:
+            file.close()
+            return wczytane_monety
+                
+
+
 automat = Automat(obslugiwane_nominaly)
 
-automat.dodajMonete(moneta1)
-automat.dodajMonete(moneta2)
-automat.dodajMonete(moneta3)
 
-print(moneta3.nominal)
-moneta3.nominal = 0.2
-print(moneta3.nominal)
-
+lista_monet = automat.wczytaj_monety('PLN')
+for m in lista_monet:
+    automat.dodajMonete(m)
