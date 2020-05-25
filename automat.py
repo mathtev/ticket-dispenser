@@ -98,10 +98,11 @@ class Automat(PrzechowywaczMonet):
     
     def __init__(self, obslugiwane_monety):
         super().__init__(obslugiwane_monety)
-        self.doZaplaty = Decimal('0')
+        self.do_zaplaty = Decimal('0')
+        self.wartosc_wrzuconych = Decimal('0')
 
     def reset(self):
-        self.doZaplaty = Decimal('0')
+        self.do_zaplaty = Decimal('0')
         self._monety.clear()
 
     def dodajMonete(self, m):

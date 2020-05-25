@@ -1,6 +1,8 @@
+from decimal import Decimal, ROUND_HALF_UP
 import Automat as aut
 import tkinter as tk
 from tkinter import font  as tkfont
+
 
 #TODO
 #Drugie okno z monetami i wpisywaniem ich liczby
@@ -12,7 +14,8 @@ IMG_PATH = './images2/'
 IMG_EXT = '.png'
 photos = []
 
-automat = aut.Automat(aut.OBSLUGIWANE_NOMINALY)
+OBSLUGIWANE_NOMINALY = aut.OBSLUGIWANE_NOMINALY
+automat = aut.Automat(OBSLUGIWANE_NOMINALY)
 
 automat.wczytaj_monety('PLN')
 
@@ -34,7 +37,6 @@ class Application(tk.Tk):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
-
             # put all of the pages in the same location;
             # the one on the top of the stacking order
             # will be the one that is visible.
@@ -69,8 +71,8 @@ class MainWindow(tk.Frame):
         wybrane_bilety = [0]*liczba_biletow    #liczba wybranych biletów dla każdego typu biletu
         lb_wybrane_bilety = []  
 
-        lb_cena = tk.Label(self, text="Do zapłaty: %.2f" % automat.doZaplaty, font=controller.main_font)
-        lb_cena.grid(row = 7, column = 2, columnspan=3)
+        lb_do_zaplaty = tk.Label(self, text="Do zapłaty: %.2f" % automat.do_zaplaty, font=controller.main_font)
+        lb_do_zaplaty.grid(row = 7, column = 2, columnspan=3)
 
         plus_btns = []
         minus_btns = []
@@ -83,19 +85,19 @@ class MainWindow(tk.Frame):
 
 
         def update_price():
-            lb_cena.config(text="Do zapłaty: %.2f" % automat.doZaplaty)
+            lb_do_zaplaty.config(text="Do zapłaty: %.2f" % automat.do_zaplaty)
 
         def plus_pressed(idx):
             if minus_btns[idx]["state"] == "disabled":
                 minus_btns[idx]["state"] = "normal"
-            automat.doZaplaty += automat.ceny_biletow[idx]
+            automat.do_zaplaty += automat.ceny_biletow[idx]
             update_price()
             wybrane_bilety[idx] += 1
             lb_wybrane_bilety[idx].config(text="%i" % wybrane_bilety[idx])
 
         def minus_pressed(idx):
             if wybrane_bilety[idx] > 0:
-                automat.doZaplaty -= automat.ceny_biletow[idx]
+                automat.do_zaplaty -= automat.ceny_biletow[idx]
                 update_price()
                 wybrane_bilety[idx] -= 1
                 lb_wybrane_bilety[idx].config(text="%i" % wybrane_bilety[idx])
@@ -128,33 +130,65 @@ class MainWindow(tk.Frame):
 
 class PageOne(tk.Frame):
 
+   
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.entry_label_font = tkfont.Font(family='Helvetica', size=12, weight='bold')
+
+        def coin_btn_pressed(idx):
+            nonlocal current_val
+            v.set(1)
+            current_val = OBSLUGIWANE_NOMINALY[idx]
+            entry_label.configure(text="Wprowadź liczbę nominałów %.2f zł" % current_val)
+
+
+        def submit_pressed():
+            try:
+                val = int(entry.get())
+            except ValueError:
+                print("Wprowadzono złe dane")
+            else:
+                automat.wartosc_wrzuconych += val*current_val
+                lb_wartosc_wrzuconych.config(text="Wrzucono: %.2f" % automat.wartosc_wrzuconych)
 
         coin_btns = []
+        current_val = 0
+        v = tk.IntVar()
+        entry_label = tk.Label(self, font=self.entry_label_font)
+        entry = tk.Entry(self, text=v)
+        submit_btn = tk.Button(self, text='Potwierdź', font=self.entry_label_font, 
+                                command=submit_pressed)
+        lb_do_zaplaty = tk.Label(self, text="Do zapłaty: %.2f" % automat.do_zaplaty, font=controller.main_font)
+        lb_wartosc_wrzuconych = tk.Label(self, text="Wrzucono: %.2f" % automat.wartosc_wrzuconych, font=controller.main_font)
+        back_btn = tk.Button(self, text="Wróć do wyboru biletów", font=controller.main_font,
+                    command=lambda: controller.show_frame("MainWindow"))
+        
 
+        entry.grid(row=3, column=4, columnspan=2, pady=50)
+        submit_btn.grid(row=3, column=6, columnspan=3,sticky="w") 
+        entry_label.grid(row=3,column=0,columnspan=4)
+        lb_do_zaplaty.grid(row=4,column=6,columnspan=4,sticky="e")
+        lb_wartosc_wrzuconych.grid(row=5,column=6,columnspan=4,sticky="e")
+        back_btn.grid(row=0,column=0,columnspan=5, pady=(0, 20))
+                   
         for i in range(len(IMG_NAMES)):
-            b=tk.Button(self)
+            b=tk.Button(self, command=lambda idx=i: coin_btn_pressed(idx))
             img_name = IMG_PATH + IMG_NAMES[i] + IMG_EXT
             photos.append(tk.PhotoImage(file=img_name))
             b.config(image=photos[i])
             coin_btns.append(b)
 
         for i, b in enumerate(coin_btns[:-3]):
-            b.grid(row=1,column=i)
+            b.grid(row=1,column=i, pady=5)
         for i, b in enumerate(coin_btns[-3:]):
-            b.grid(row=2,column=i*2,columnspan=2)
-
-        self.entry_var = tk.StringVar()
-        entry = tk.Entry(self, textvariable=self.entry_var)
-        entry.grid(column=0, row=3, columnspan=2, padx=2, pady=2)
-
-        button = tk.Button(self, text="Go to the start page",
-                           command=lambda: controller.show_frame("MainWindow"))
-        button.grid(row=0,column=0,columnspan=2)
-
-
+            b.grid(row=2,column=i*2,columnspan=3, pady=5, sticky="w")
+    
+        def update_price():
+            '''Cena do zapłaty jest aktualizowana co 2 sekundy'''
+            lb_do_zaplaty.config(text="Do zapłaty: %.2f" % automat.do_zaplaty)
+            self.after(2000, update_price)
+        update_price()
 class PageTwo(tk.Frame):
 
     def __init__(self, parent, controller):
