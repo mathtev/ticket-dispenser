@@ -1,9 +1,9 @@
 from decimal import Decimal, ROUND_HALF_UP
 import csv
 
-grosz = Decimal('.01')
-lista_nominalow = ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5','10','20','50']
-obslugiwane_nominaly = tuple(map(Decimal, lista_nominalow))
+GROSZ = Decimal('.01')
+LISTA_NOMINALOW = ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5','10','20','50']
+OBSLUGIWANE_NOMINALY = tuple(map(Decimal, LISTA_NOMINALOW))
 
 
 class Error(Exception): 
@@ -11,30 +11,22 @@ class Error(Exception):
   
 
 class NieznanaWalutaException(Error):
-    
     def __init__(self, msg):
         
         self.msg = msg 
 
 class ListaMonetException(Error):
     def __init__(self, msg):
-        
         self.msg = msg
-
     lista_monet = []
 
 class ZlyNominalException(ListaMonetException):
-    
     def __init__(self, msg):
-        
         self.msg = msg
 
 class ZlyFormatPlikuException(ListaMonetException):
-    
     def __init__(self, msg):
-        
         self.msg = msg
-
 
 
 class Moneta:
@@ -44,7 +36,7 @@ class Moneta:
         nominal = Decimal(str(nominal))
 
         try:
-            if nominal not in obslugiwane_nominaly:
+            if nominal not in OBSLUGIWANE_NOMINALY:
                 raise(ZlyNominalException("Zły nominał"))
             
         except ZlyNominalException as err:
@@ -57,7 +49,7 @@ class Moneta:
 
     @property
     def nominal(self):
-        return self._nominal.quantize(grosz, ROUND_HALF_UP)
+        return self._nominal.quantize(GROSZ, ROUND_HALF_UP)
 
     @nominal.setter
     def nominal(self, n):
@@ -146,7 +138,7 @@ class Automat(PrzechowywaczMonet):
                     n = row[1]
 
                 try:
-                    if Decimal(nom) not in obslugiwane_nominaly:
+                    if Decimal(nom) not in self._obslugiwane_monety:
                         raise(ZlyNominalException("Nieobsługiwany nominał"))
                 except ZlyNominalException as err:
                     print(err.msg)
@@ -162,15 +154,10 @@ class Automat(PrzechowywaczMonet):
         else:
             print('Sukces! Monety zostały wczytane')
             wczytane_monety = sorted(wczytane_monety, key=lambda x: x.nominal)
+            for m in wczytane_monety:
+                self.dodajMonete(m)
         finally:
             file.close()
-            return wczytane_monety
                 
 
 
-automat = Automat(obslugiwane_nominaly)
-
-
-lista_monet = automat.wczytaj_monety('PLN')
-for m in lista_monet:
-    automat.dodajMonete(m)
