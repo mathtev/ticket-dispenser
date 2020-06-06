@@ -113,24 +113,25 @@ class Automat(PrzechowywaczMonet):
 
     def wydaj_reszte(self, do_wydania):
         do_wydania = Decimal(str(do_wydania))
-        if do_wydania <= 0:
-            print('wartość do wydania musi być większa niż 0')
+        wydane_monety = []
+        if do_wydania < 0:
+            print('kwota do wydania nie może być ujemna')
             return
+        elif do_wydania == 0:
+            return wydane_monety
         elif self.suma_monet() < do_wydania:
             print('Automat nie może wydać reszty')
-            self.zwroc_wrzucone()
-            return
-        wydane_monety = []
-        for nominal in reversed(self.obslugiwane_monety):
-            while do_wydania >= nominal:
-                zwrocona = self.zwroc_monete(nominal)
-                if zwrocona is None:
+            return self.zwroc_pieniadze()
+        else:
+            for nominal in reversed(self.obslugiwane_monety):
+                while do_wydania >= nominal:
+                    zwrocona = self.zwroc_monete(nominal)
+                    if zwrocona is None:
+                        break
+                    do_wydania -= zwrocona.nominal
+                    wydane_monety.append(zwrocona)
+                if do_wydania == 0:
                     break
-                do_wydania -= zwrocona.nominal
-                wydane_monety.append(zwrocona)
-            if do_wydania == 0:
-                break
-            
         try:
             if do_wydania > 0:
                 raise(nieMoznaZwrocicMonetException(f'Automat nie może wydać reszty '
@@ -140,10 +141,10 @@ class Automat(PrzechowywaczMonet):
             for m in wydane_monety:
                 self.dodaj_monete(m)
             wydane_monety.clear()
-            return self.zwroc_wrzucone()
+            return self.zwroc_pieniadze()
         return wydane_monety
 
-    def zwroc_wrzucone(self):
+    def zwroc_pieniadze(self):
         do_zwrotu = []
         for nominal in reversed(self.obslugiwane_monety):
             while self.wartosc_wrzuconych >= nominal:

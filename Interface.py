@@ -45,7 +45,7 @@ class Application(tk.Tk):
         frame.tkraise()
 
     def reset_all(self):
-        '''reset all frames'''
+        '''TODO reset all frames'''
         pass
 
     def update_frame(self, page_name):
@@ -171,12 +171,19 @@ class PageOne(tk.Frame):
                     m = aut.Moneta(wybrany_nominal, automat.OBSLUGIWANA_WALUTA)
                     automat.dodaj_monete(m)
                 automat.wartosc_wrzuconych += wprowadzona_liczba*wybrany_nominal
+                zwrot_btn["state"] = "normal"
+                if automat.wartosc_wrzuconych >= automat.do_zaplaty:
+                    self.zaplac_btn["state"] = "normal"
                 lb_wartosc_wrzuconych.config(text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}')
         
-        def zaplac():
+        def zaplac_pressed():
             kwota = automat.wartosc_wrzuconych - automat.do_zaplaty
             print('Automat zwrócił następujące monety:\n', automat.wydaj_reszte(kwota))
             controller.show_frame("PageTwo")
+
+        def zwrot_pressed():
+            print('Automat zwrócił: \n', automat.zwroc_pieniadze())
+            lb_wartosc_wrzuconych.config(text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}')
 
         wybrany_nominal = 0
         coin_btns = []
@@ -184,12 +191,14 @@ class PageOne(tk.Frame):
         entry = tk.Entry(self, text=form_var)
         entry_label = tk.Label(self, font=self.entry_label_font)
         submit_btn = tk.Button(self, text='Potwierdź', font=self.entry_label_font, 
-                                command=submit_pressed)
-        zaplac_btn = tk.Button(self, text='Zapłać', font=controller.main_font, 
-                                command=zaplac)
-        self.lb_do_zaplaty = tk.Label(self, text="Do zapłaty: %.2f" % automat.do_zaplaty,
+                               command=submit_pressed)
+        self.zaplac_btn = tk.Button(self, text='Zapłać', font=controller.main_font, state="disabled", 
+                               command=zaplac_pressed)
+        zwrot_btn = tk.Button(self, text='Zwróć pieniądze', font=controller.main_font, state="disabled",
+                              command=zwrot_pressed)
+        self.lb_do_zaplaty = tk.Label(self, text=f'Do zapłaty: {automat.do_zaplaty:.2f}',
                                  font=controller.main_font)
-        lb_wartosc_wrzuconych = tk.Label(self, text="Wrzucono: %.2f" % automat.wartosc_wrzuconych, 
+        lb_wartosc_wrzuconych = tk.Label(self, text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}', 
                                          font=controller.main_font)
         back_btn = tk.Button(self, text="Wróć do wyboru biletów", font=controller.main_font,
                              command=lambda: controller.show_frame("MainWindow"))
@@ -197,7 +206,8 @@ class PageOne(tk.Frame):
 
         entry.grid(row=3, column=4, columnspan=2, pady=50)
         submit_btn.grid(row=3, column=6, columnspan=3, sticky="w")
-        zaplac_btn.grid(row=6, column=6, columnspan=3, sticky="w")
+        self.zaplac_btn.grid(row=6, column=6, columnspan=3, sticky="w")
+        zwrot_btn.grid(row=7, column=6, columnspan=4, sticky="w")
         entry_label.grid(row=3, column=0, columnspan=4)
         self.lb_do_zaplaty.grid(row=4, column=6, columnspan=4, sticky="e")
         lb_wartosc_wrzuconych.grid(row=5, column=6, columnspan=4, sticky="e")
@@ -217,7 +227,9 @@ class PageOne(tk.Frame):
     
     def update(self):
         automat = self.controller.automat
-        self.lb_do_zaplaty.config(text="Do zapłaty: %.2f" % automat.do_zaplaty)
+        self.lb_do_zaplaty.config(text=f'Do zapłaty: {automat.do_zaplaty:.2f}')
+        if automat.wartosc_wrzuconych < automat.do_zaplaty:
+            self.zaplac_btn["state"] = "disabled"
     
     def reset(self):
         pass
