@@ -57,6 +57,9 @@ class Moneta:
     def __repr__(self):
         return f'Moneta({self.nominal}, {self.waluta})'
 
+    def __eq__(self, o):
+        return self.nominal == o.nominal and self.waluta == o.waluta
+
 class PrzechowywaczMonet:
     def __init__(self, obslugiwane_monety):
         self.obslugiwane_monety = obslugiwane_monety
@@ -103,20 +106,38 @@ class Automat(PrzechowywaczMonet):
         self._monety.clear()
         self.wybrane_bilety = [0]*self.liczba_biletow
 
-    def dodaj_monete(self, m):
-        if not isinstance(m,Moneta): 
+    def dodaj_monete(self, moneta):
+        if not isinstance(moneta, Moneta): 
             print('Przesłany obiekt nie jest monetą')
             return
-        if m.waluta != self.OBSLUGIWANA_WALUTA:
-            raise NieznanaWalutaException(f'Nieznana waluta: {m.waluta}')
-        self._monety.append(m)
+        if moneta.waluta != self.OBSLUGIWANA_WALUTA:
+            raise NieznanaWalutaException(f'Nieznana waluta: {moneta.waluta}')
+        self._monety.append(moneta)
 
-    def wydaj_reszte(self, do_wydania):
-        do_wydania = Decimal(str(do_wydania))
+    def wrzuc_monete(self, moneta, liczba):
+        for i in range(liczba):
+            self.dodaj_monete(moneta)
+        self.wartosc_wrzuconych += liczba*moneta.nominal
+
+    def zaladuj_monety(self, liczba, nominal):
+        try:
+            liczba = int(liczba)
+            if liczba <= 0:
+                raise ValueError
+        except ValueError:
+            print('Wprowadzono złe dane')
+        else:
+            moneta = Moneta(nominal, self.OBSLUGIWANA_WALUTA)
+            self.wrzuc_monete(moneta, liczba)
+
+    def wydaj_reszte(self):
+        
+        do_wydania = Decimal(str(self.wartosc_wrzuconych - self.do_zaplaty))
         wydane_monety = []
+        
         if do_wydania < 0:
-            print('kwota do wydania nie może być ujemna')
-            return
+            print('Wprowadzona kwota jest zbyt mała')
+            return self.zwroc_pieniadze()
         elif do_wydania == 0:
             return wydane_monety
         elif self.suma_monet() < do_wydania:
@@ -159,7 +180,15 @@ class Automat(PrzechowywaczMonet):
             raise(nieMoznaZwrocicMonetException(f'Automat nie może zwrócić '
                                                 f'{self.wartosc_wrzuconych}.'))
         return do_zwrotu
+
+    def dodaj_bilet(self, idx):
+        self.do_zaplaty += self.CENY_BILETOW[idx]
+        self.wybrane_bilety[idx] += 1
         
+    def usun_bilet(self, idx):
+        self.do_zaplaty -= self.CENY_BILETOW[idx]
+        self.wybrane_bilety[idx] -= 1
+
     def wczytaj_monety(self, waluta):
         wczytane_monety = []
         try:
@@ -190,7 +219,7 @@ class Automat(PrzechowywaczMonet):
             wczytane_monety.clear()
         else:
             print('Sukces! Monety zostały wczytane')
-            #wczytane_monety = sortsorted(wczytane_monety, key=lambda x: x.nominal)
+            #wczytane_monety = sorted(wczytane_monety, key=lambda x: x.nominal)
             for m in wczytane_monety:
                 self.dodaj_monete(m)
                 

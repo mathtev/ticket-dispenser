@@ -1,4 +1,4 @@
-import Automat as aut
+import automat as aut
 from decimal import Decimal, ROUND_HALF_UP
 import tkinter as tk
 from tkinter import font  as tkfont
@@ -49,7 +49,7 @@ class Application(tk.Tk):
         pass
 
     def update_frame(self, page_name):
-        '''Show a frame for the given page name'''
+        '''Update a frame for the given page name'''
         frame = self.frames[page_name]
         frame.update()
 
@@ -96,18 +96,16 @@ class MainWindow(tk.Frame):
         def plus_pressed(idx):
             if minus_btns[idx]["state"] == "disabled":
                 minus_btns[idx]["state"] = "normal"
-            automat.do_zaplaty += automat.CENY_BILETOW[idx]
+            automat.dodaj_bilet(idx)
             update_price()
             controller.update_frame("PageOne")
-            automat.wybrane_bilety[idx] += 1
             self.lb_wybrane_bilety[idx].config(text="%i" % automat.wybrane_bilety[idx])
 
         def minus_pressed(idx):
             if automat.wybrane_bilety[idx] > 0:
-                automat.do_zaplaty -= automat.CENY_BILETOW[idx]
+                automat.usun_bilet(idx)
                 update_price()
                 controller.update_frame("PageOne")
-                automat.wybrane_bilety[idx] -= 1
                 self.lb_wybrane_bilety[idx].config(text="%i" % automat.wybrane_bilety[idx])
             if automat.wybrane_bilety[idx] == 0:
                 minus_btns[idx]["state"] = "disabled"
@@ -159,31 +157,23 @@ class PageOne(tk.Frame):
             entry_label.configure(text=f'Wprowadź liczbę nominałów {wybrany_nominal:.2f} zł')
 
         def submit_pressed():
-            try:
-                wprowadzona_liczba = int(entry.get())
-                if wprowadzona_liczba <= 0:
-                    print('Wprowadzona kwota jest mniejsza lub równa 0')
-                    return
-            except ValueError:
-                print('Wprowadzono złe dane')
-            else:
-                for i in range(wprowadzona_liczba):
-                    m = aut.Moneta(wybrany_nominal, automat.OBSLUGIWANA_WALUTA)
-                    automat.dodaj_monete(m)
-                automat.wartosc_wrzuconych += wprowadzona_liczba*wybrany_nominal
-                zwrot_btn["state"] = "normal"
-                if automat.wartosc_wrzuconych >= automat.do_zaplaty:
-                    self.zaplac_btn["state"] = "normal"
-                lb_wartosc_wrzuconych.config(text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}')
+
+            wprowadzona_liczba = entry.get()
+            automat.zaladuj_monety(wprowadzona_liczba, wybrany_nominal)
+
+            zwrot_btn["state"] = "normal"
+            if automat.wartosc_wrzuconych >= automat.do_zaplaty:
+                self.zaplac_btn["state"] = "normal"
+            lb_wartosc_wrzuconych.config(text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}')
         
         def zaplac_pressed():
-            kwota = automat.wartosc_wrzuconych - automat.do_zaplaty
-            print('Automat zwrócił następujące monety:\n', automat.wydaj_reszte(kwota))
+            print(f'Automat zwrócił następujące monety:\n{automat.wydaj_reszte()}')
             controller.show_frame("PageTwo")
 
         def zwrot_pressed():
-            print('Automat zwrócił: \n', automat.zwroc_pieniadze())
+            print(f'Automat zwrócił:\n{automat.zwroc_pieniadze()}')
             lb_wartosc_wrzuconych.config(text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}')
+            self.update()
 
         wybrany_nominal = 0
         coin_btns = []
@@ -208,7 +198,7 @@ class PageOne(tk.Frame):
         submit_btn.grid(row=3, column=6, columnspan=3, sticky="w")
         self.zaplac_btn.grid(row=6, column=6, columnspan=3, sticky="w")
         zwrot_btn.grid(row=7, column=6, columnspan=4, sticky="w")
-        entry_label.grid(row=3, column=0, columnspan=4)
+        entry_label.grid(row=3, column=0, columnspan=5, sticky="w")
         self.lb_do_zaplaty.grid(row=4, column=6, columnspan=4, sticky="e")
         lb_wartosc_wrzuconych.grid(row=5, column=6, columnspan=4, sticky="e")
         back_btn.grid(row=0, column=0, columnspan=5, pady=(0, 20))
