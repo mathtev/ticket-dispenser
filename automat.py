@@ -7,33 +7,64 @@ OBSLUGIWANE_NOMINALY = tuple(map(Decimal, LISTA_NOMINALOW))
 
 
 class Error(Exception): 
+    """Klasa bazowa dla własnych wyjątków."""
     pass
 
 class NieznanaWalutaException(Error):
+    """Wyjątek, waluta jest nieznana.
+    
+    Attributes:
+        msg: str, wiadomość o błędzie.
+    """
     def __init__(self, msg):
         self.msg = msg 
 
 class ListaMonetException(Error):
+    """Wyjątek, złe działania na liście monet.
+    
+    Attributes:
+        msg: str, wiadomość o błędzie.
+    """
     def __init__(self, msg):
         self.msg = msg
 
 class nieMoznaZwrocicMonetException(Error):
+    """Wyjątek, nie można zwrócić monet.
+    
+    Attributes:
+        msg: str, wiadomość o błędzie.
+    """
     def __init__(self, msg):
         self.msg = msg 
 
 class ZlyNominalException(ListaMonetException):
+    """Wyjątek, zły nominał.
+    
+    Attributes:
+        msg: str, wiadomość o błędzie.
+    """
     def __init__(self, msg):
         self.msg = msg
 
 class ZlyFormatPlikuException(ListaMonetException):
+    """Wyjątek, zły format pliku.
+    
+    Attributes:
+        msg: str, wiadomość o błędzie.
+    """
     def __init__(self, msg):
         self.msg = msg
 
 
 class Moneta:
-    
-    def __init__(self, nominal, waluta):
+    """Reprezentacja monety.
 
+    Attributes:
+        _nominal: Decimal, wartość monety.
+        waluta: str, określa walutę.
+    """
+    def __init__(self, nominal, waluta):
+        """Konstruktor dla Moneta."""
         nominal = Decimal(str(nominal))
 
         if nominal not in OBSLUGIWANE_NOMINALY:
@@ -45,10 +76,16 @@ class Moneta:
 
     @property
     def nominal(self):
+        """Odczytaj nominał."""
         return self._nominal.quantize(GROSZ, ROUND_HALF_UP)
 
     @nominal.setter
     def nominal(self, n):
+        """Ustaw nominał.
+        
+        Args:
+            n: Decimal, nowy nominał.
+        """
         self._nominal = Decimal(str(n))
 
     def __str__(self):
@@ -60,24 +97,54 @@ class Moneta:
     def __eq__(self, o):
         return self.nominal == o.nominal and self.waluta == o.waluta
 
+
 class PrzechowywaczMonet:
+    """Służy do przechowywania monet.
+
+    Attributes:
+        obslugiwane_monety: tuple, określa jakie nominały są dozwolone.
+        _monety: list, przechowywane monety.
+    """
     def __init__(self, obslugiwane_monety):
+        """Konstruktor dla PrzechowywaczMonet, ustawia domyślne wartości.
+        
+        Args:
+            obslugiwane_monety: tuple, określa jakie nominały są dozwolone.
+        """
         self.obslugiwane_monety = obslugiwane_monety
         self._monety = []
 
     def dodaj_monete(self, m):
+        """Dodaje monetę do listy _monety.
+        
+        Args:
+            m: Moneta, moneta do dodania.
+        """
         if isinstance(m,Moneta):
             self._monety.append(m)
         else:
             print('Przesłany obiekt nie jest monetą')
 
     def suma_monet(self):
+        """Sumuje wszystkie nominały w liście _monety.
+        
+        Returns:
+            Suma monet w liście.
+        """
         suma = Decimal('0')
         for m in self._monety:
             suma += m.nominal
         return suma
 
     def zwroc_monete(self, nominal):
+        """Zwraca z listy _monety monetę o określonym nominale.
+
+        Args:
+            nominal: Decimal, określa wartość szukanej monety.
+        
+        Returns:
+            Obiekt monety, jeśli znaleziono szukany nominał w liście, inaczej None
+        """
         nominal = Decimal(str(nominal))
         zwrotna = None
         for moneta in self._monety:
@@ -89,11 +156,21 @@ class PrzechowywaczMonet:
 
 
 class Automat(PrzechowywaczMonet):
+    """Automat przechowywujący monety.
+
+    Attributes:
+        do_zaplaty: Decimal, kwota do zapłaty.
+        wartosc_wrzuconych: Decimal, wartość monet wrzuconych przez użytkownika.
+        liczba_biletow: int, liczba rodzai dostępnych biletów.
+        wybrane_bilety: list, zawiera liczby int określające liczbę biletów, jakie
+            zostały wybrane przez użytkownika, dla każdego rodzaju.
+    """
 
     OBSLUGIWANA_WALUTA = 'PLN'
     CENY_BILETOW = tuple(map(Decimal, ['2.40','3.70','4.20','1.70','2.20','2.50']))
     
     def __init__(self, obslugiwane_monety):
+        """Konstruktor dla Automat. Ustawia domyślne wartości atrybutów"""
         super().__init__(obslugiwane_monety)
         self.do_zaplaty = Decimal('0')
         self.wartosc_wrzuconych = Decimal('0')
@@ -101,12 +178,22 @@ class Automat(PrzechowywaczMonet):
         self.wybrane_bilety = [0]*self.liczba_biletow
 
     def reset(self):
+        """Resetuje atrybuty do wartości domyślnych"""
         self.do_zaplaty = Decimal('0')
         self.wartosc_wrzuconych = Decimal('0')
         self._monety.clear()
         self.wybrane_bilety = [0]*self.liczba_biletow
 
     def dodaj_monete(self, moneta):
+        """Dodaje monetę do listy _monety.
+        
+        Args:
+            m: Moneta, moneta do dodania.
+        
+        Raises:
+            NieznanaWalutaException jeśli waluta monety nie jest obsługiwana 
+                przez automat.
+        """
         if not isinstance(moneta, Moneta): 
             print('Przesłany obiekt nie jest monetą')
             return
@@ -115,22 +202,47 @@ class Automat(PrzechowywaczMonet):
         self._monety.append(moneta)
 
     def wrzuc_monete(self, moneta, liczba):
+        """Dadaje monetę oraz zwiększa wartość wrzuconych o jej nominał
+        
+        Args:
+            moneta: Moneta, moneta wrucona przez użytkownika.
+            liczba: int, liczba wrzuconych monet o danym nominale.
+        """
         for i in range(liczba):
             self.dodaj_monete(moneta)
         self.wartosc_wrzuconych += liczba*moneta.nominal
 
     def zaladuj_monety(self, liczba, nominal):
+        """Załaduj wrzucone monety.
+        
+        Args:
+            liczba: int, liczba wrzuconych monet o danym nominale.
+            nominal: Decimal, określa wartość monety.
+
+        Raises:
+            ValueError: Jeśli wprowadzona wartość jest nieprawidłowa.
+        """
         try:
             liczba = int(liczba)
             if liczba <= 0:
-                raise ValueError
-        except ValueError:
-            print('Wprowadzono złe dane')
+                raise ValueError('Wprowadzono złe dane')
+        except ValueError as err:
+            print(str(err))
+            raise 
         else:
             moneta = Moneta(nominal, self.OBSLUGIWANA_WALUTA)
             self.wrzuc_monete(moneta, liczba)
 
     def wydaj_reszte(self):
+        """Oblicz i wydaj resztę z wrzuconych monet.
+
+        Returns:
+            Lista zawierająca resztę z wrzuconych monet jeśli automat może wydać,
+            inaczej lista monet, których wartość wynosi tyle co tych które zostały wrzucone.
+
+        Raises:
+            nieMoznaZwrocicMonetException: Jeśli automat nie może zwrócić.
+        """
         
         do_wydania = Decimal(str(self.wartosc_wrzuconych - self.do_zaplaty))
         wydane_monety = []
@@ -166,6 +278,14 @@ class Automat(PrzechowywaczMonet):
         return wydane_monety
 
     def zwroc_pieniadze(self):
+        """Zwróć wszystkie monety
+
+        Returns:
+            Lista monet których wartość odpowiada wszystkim wrzuconym przez użytkownika
+
+        Raises:
+            nieMoznaZwrocicMonetException: Jeśli automat nie może zwrócić.
+        """
         do_zwrotu = []
         for nominal in reversed(self.obslugiwane_monety):
             while self.wartosc_wrzuconych >= nominal:
@@ -182,14 +302,34 @@ class Automat(PrzechowywaczMonet):
         return do_zwrotu
 
     def dodaj_bilet(self, idx):
+        """Dodaj bilet do automatu
+
+        Args: 
+            idx: int, określa rodzaj wybranego biletu.
+        """
         self.do_zaplaty += self.CENY_BILETOW[idx]
         self.wybrane_bilety[idx] += 1
         
     def usun_bilet(self, idx):
+        """Usuń bilet do automatu
+
+        Args: 
+            idx: int, określa rodzaj biletu do usunięcia.
+        """
         self.do_zaplaty -= self.CENY_BILETOW[idx]
         self.wybrane_bilety[idx] -= 1
 
     def wczytaj_monety(self, waluta):
+        """Wczytaj monety z pliku
+
+        Args:
+            waluta: str, określa na jaką walutę ustawić wczytane monety.
+
+        Raises:
+            ListaMonetException: jeśli plik ma zły format lub wczytany 
+                nominał jest nieprawidłowy.
+        """
+
         wczytane_monety = []
         try:
             with open('lista.csv', 'r') as file:  
@@ -217,6 +357,7 @@ class Automat(PrzechowywaczMonet):
         except ListaMonetException as err:
             print('błąd wczytywania')
             wczytane_monety.clear()
+            raise
         else:
             print('Sukces! Monety zostały wczytane')
             #wczytane_monety = sorted(wczytane_monety, key=lambda x: x.nominal)

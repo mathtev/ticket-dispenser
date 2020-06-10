@@ -12,8 +12,28 @@ IMG_EXT = '.png'
 
 
 class Application(tk.Tk):
+    """Inicjalizuje działanie aplikacji.
+
+    Attributes:
+        photos: list, zdjęcia monet oraz banknotów
+        automat: aut.Automat, dostarcza logikę do działania aplikacji
+        main_font: tkfont.Font, czcionka używana w aplikacji
+        container: tk.Frame, kontener, w którym umieszczone zostaną wszystkie okna
+        frames: dict, każdej nazwie strony przyporządkowuje jej instancję
+    """
 
     def __init__(self, automat, *args, **kwargs):
+        """Konstruktor dla Application.
+
+        Tworzy wszystkie strony oraz kontener, w którym będą one umieszczone. Ustawia 
+        i konfiguruje domyślne wartości, umieszcza kontener oraz strony na ekranie.
+
+        Args:
+            automat: aut.Automat, dostarcza logikę do działania aplikacji
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+
         tk.Tk.__init__(self, *args, **kwargs)
 
         self.photos = []
@@ -30,33 +50,62 @@ class Application(tk.Tk):
         self.show_frame("MainWindow")
 
     def create_frames(self):
+        """zainicjalizuj wszystkie strony i umieść je jedna na drugiej"""
         for F in (MainWindow, PageOne, PageTwo):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self)
             self.frames[page_name] = frame
-            # put all of the pages in the same location;
-            # the one on the top of the stacking order
-            # will be the one that is visible.
+            # umieść wszystkie strony w tym samym miejscu
+            # widoczna będzie ta strona, która jest na wierzchu
             frame.grid(row=0, column=0, sticky="nsew")
 
     def show_frame(self, page_name):
-        '''Show a frame for the given page name'''
+        """Umieść daną stronę na wierzchu stosu, tak aby była widoczna
+
+        Args:
+            page_name: str, nazwa strony
+        """
         frame = self.frames[page_name]
         frame.tkraise()
 
     def reset_all(self):
-        '''TODO reset all frames'''
+        """TODO zresetuj wszystkie strony"""
         pass
 
     def update_frame(self, page_name):
-        '''Update a frame for the given page name'''
+        """Uaktualnij daną stronę
+        
+        Args:
+            page_name: str, nazwa strony
+        """
+        
         frame = self.frames[page_name]
         frame.update()
 
 
 class MainWindow(tk.Frame):
+    """Okno startowe z wyborem biletów.
+
+    Attributes:
+        controller: Application, odpowiada argumentowi dostarczonemu w konstruktorze,
+            instancja klasy bazowej
+        automat: aut.Automat, dziedziczony z klasy bazowej, logika działania aplikacji
+        plus_minus_font: tkfont.Font, czcionka dla przycisków plus i minus
+        lb_wybrane_bilety: list, zawiera etykiety, przyporządkowujące każdemu
+            biletowi ich liczbę wybraną przez użytkownika
+        lb_do_zaplaty: tk.Label, określa kwotę do zapłaty
+    """
 
     def __init__(self, parent, controller):
+        """Konstruktor dla MainWindow.
+
+        Tworzy przyciski i etykiety, rozmieszcza elementy na stronie.
+
+        Args:
+            parent: tk.Frame, kontener będący rodzicem strony.
+            controller: Application, instancja klasy bazowej
+        """
+
         tk.Frame.__init__(self, parent)
         self.controller = controller
         automat = controller.automat
@@ -71,7 +120,8 @@ class MainWindow(tk.Frame):
                             "40-minutowy\nUlgowy\t\t\t2.20 zł",
                             "60-minutowy\nUlgowy\t\t\t2.50 zł"]
 
-        automat.wybrane_bilety = [0]*automat.liczba_biletow    #liczba wybranych biletów dla każdego typu biletu
+        #liczba wybranych biletów dla każdego typu biletu
+        automat.wybrane_bilety = [0]*automat.liczba_biletow
         self.lb_wybrane_bilety = []
 
         self.lb_do_zaplaty = tk.Label(self, text="Do zapłaty: %.2f" % automat.do_zaplaty, 
@@ -91,9 +141,15 @@ class MainWindow(tk.Frame):
 
 
         def update_price():
+            """Uaktualnij cenę pokazywaną na etykiecie"""
             self.lb_do_zaplaty.config(text="Do zapłaty: %.2f" % automat.do_zaplaty)
 
         def plus_pressed(idx):
+            """Obsługa naciśnięcia przycisku plus
+            
+            Args:
+                idx: int, numer w tablicy plus_btns
+            """
             if minus_btns[idx]["state"] == "disabled":
                 minus_btns[idx]["state"] = "normal"
             automat.dodaj_bilet(idx)
@@ -102,6 +158,11 @@ class MainWindow(tk.Frame):
             self.lb_wybrane_bilety[idx].config(text="%i" % automat.wybrane_bilety[idx])
 
         def minus_pressed(idx):
+            """Obsługa naciśnięcia przycisku minus
+        
+            Args:
+                idx: int, numer w tablicy minus_btns
+            """
             if automat.wybrane_bilety[idx] > 0:
                 automat.usun_bilet(idx)
                 update_price()
@@ -136,28 +197,53 @@ class MainWindow(tk.Frame):
         #button2.grid(row=1,column=2)
     
     def update(self):
+        """TODO: Uaktualnij dane na stronie"""
         pass
 
     def reset(self):
+        """TODO: Zresetuj stronę do stanu początkowego"""
         pass
 
 
 class PageOne(tk.Frame):
+    """Okno wrzucania monet.
+
+    Attributes:
+        controller: Application, odpowiada argumentowi dostarczonemu w konstruktorze,
+            instancja klasy bazowej
+        automat: aut.Automat, dziedziczony z klasy bazowej, logika działania aplikacji
+        entry_label_font: tkfont.Font, czcionka dla pola tekstowego
+        zaplac_btn: tk.Button, przycisk, do dokonywania płatności
+        lb_do_zaplaty: tk.Label, etykieta określająca kwotę do zapłaty
+    """
 
     def __init__(self, parent, controller):
+        """Konstruktor dla PageOne.
+
+        Tworzy przyciski i etykiety, rozmieszcza elementy na stronie.
+
+        Args:
+            parent: tk.Frame, kontener będący rodzicem strony.
+            controller: Application, instancja klasy bazowej
+        """
         tk.Frame.__init__(self, parent)
         automat = controller.automat
         self.controller = controller
         self.entry_label_font = tkfont.Font(family='Helvetica', size=12, weight='bold')
 
         def coin_btn_pressed(idx):
+            """Obsługa naciśnięcia przycisku monety
+        
+            Args:
+                idx: int, numer w tablicy coin_btns
+            """
             form_var.set(1)
             nonlocal wybrany_nominal
             wybrany_nominal = automat.obslugiwane_monety[idx]
             entry_label.configure(text=f'Wprowadź liczbę nominałów {wybrany_nominal:.2f} zł')
 
         def submit_pressed():
-
+            """Obsługa naciśnięcia przycisku submit_btn"""
             wprowadzona_liczba = entry.get()
             automat.zaladuj_monety(wprowadzona_liczba, wybrany_nominal)
 
@@ -167,10 +253,12 @@ class PageOne(tk.Frame):
             lb_wartosc_wrzuconych.config(text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}')
         
         def zaplac_pressed():
+            """Obsługa naciśnięcia przycisku zaplac_btn"""
             print(f'Automat zwrócił następujące monety:\n{automat.wydaj_reszte()}')
             controller.show_frame("PageTwo")
 
         def zwrot_pressed():
+            """Obsługa naciśnięcia przycisku zwrot_btn"""
             print(f'Automat zwrócił:\n{automat.zwroc_pieniadze()}')
             lb_wartosc_wrzuconych.config(text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}')
             self.update()
@@ -216,17 +304,35 @@ class PageOne(tk.Frame):
             b.grid(row=2, column=i*2, columnspan=3, pady=5, sticky="w")
     
     def update(self):
+        """Uaktualnij dane na stronie"""
         automat = self.controller.automat
         self.lb_do_zaplaty.config(text=f'Do zapłaty: {automat.do_zaplaty:.2f}')
         if automat.wartosc_wrzuconych < automat.do_zaplaty:
             self.zaplac_btn["state"] = "disabled"
-    
+
     def reset(self):
+        """TODO: Zresetuj stronę do stanu początkowego"""
         pass
+
         
 class PageTwo(tk.Frame):
+    """Okno ekranu końcowego.
+
+    Attributes:
+        controller: Application, odpowiada argumentowi dostarczonemu w konstruktorze,
+            instancja klasy bazowej
+        automat: aut.Automat, dziedziczony z klasy bazowej, logika działania aplikacji
+    """
 
     def __init__(self, parent, controller):
+        """Konstruktor dla PageTwo.
+
+        Tworzy przyciski i etykiety, rozmieszcza elementy na stronie.
+
+        Args:
+            parent: tk.Frame, kontener będący rodzicem strony.
+            controller: Application, instancja klasy bazowej
+        """
         tk.Frame.__init__(self, parent)
         automat = controller.automat
         self.controller = controller
@@ -241,12 +347,15 @@ class PageTwo(tk.Frame):
         button.pack()
 
     def update(self):
+        """TODO: Uaktualnij dane na stronie"""
         pass
-    
+
     def reset(self):
+        """TODO: Zresetuj stronę do stanu początkowego"""
         pass
 
 def main():
+    """Uruchamia aplikację, ustawia niezbędne elementy"""
     automat = aut.Automat(aut.OBSLUGIWANE_NOMINALY)
     automat.wczytaj_monety('PLN')
 

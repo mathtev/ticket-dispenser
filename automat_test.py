@@ -59,7 +59,9 @@ class AutomatTest(unittest.TestCase):
         spodziewany_wynik = Decimal('150')
         do_sprawdzenia = sum(m.nominal for m in self.automat.wydaj_reszte())
 
-        # wyjątek jest obsługiwany, więc poniższa linijka nie zadziała
+        # wyjątek nie jest rzucany, więc poniższa linijka nie zadziała
+        # zamiast tego wypisywana jest na ekran informacja o błędzie oraz
+        # automat zwraca wszystkie wrzucone monety
         # W dodatku mój program nie zwraca dokładnie tych samych wrzuconych monet,
         # zwrot monet działa podobnie jak wydawanie reszty. Najpierw największe nominały
 
@@ -121,9 +123,10 @@ class AutomatTest(unittest.TestCase):
     
     def test_podanie_nieodpowiedniej_liczby_monet(self):
 
-        # Wyjątek jest obsługiwany więc poniższy kod nie zadziała
-        #self.assertRaises(ValueError, self.automat.zaladuj_monety, 6.2, Decimal('5'))
-        
+        # wartość wprowadzona przez użytkownika jest stringiem
+        self.assertRaises(ValueError, self.automat.zaladuj_monety, '2.2', Decimal('5'))
+        self.assertRaises(ValueError, self.automat.zaladuj_monety, '-5', Decimal('5'))
+
 
 if __name__ == '__main__':
     unittest.main()
