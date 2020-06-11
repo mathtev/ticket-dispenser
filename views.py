@@ -255,6 +255,7 @@ class PageOne(tk.Frame):
         def zaplac_pressed():
             """Obsługa naciśnięcia przycisku zaplac_btn"""
             print(f'Automat zwrócił następujące monety:\n{automat.wydaj_reszte()}')
+            controller.update_frame("PageTwo")
             controller.show_frame("PageTwo")
 
         def zwrot_pressed():
@@ -262,7 +263,6 @@ class PageOne(tk.Frame):
             print(f'Automat zwrócił:\n{automat.zwroc_pieniadze()}')
             lb_wartosc_wrzuconych.config(text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}')
             self.update()
-            print(automat.suma_monet())
 
         wybrany_nominal = 0
         coin_btns = []
@@ -341,15 +341,19 @@ class PageTwo(tk.Frame):
         def btn_pressed():
             controller.destroy()
 
-        label = tk.Label(self, text="Dziękujemy", font=controller.main_font)
-        label.pack(side="top", fill="x", pady=10)
+        self.label = tk.Label(self, font=controller.main_font)
+        self.label.pack(side="top", fill="x", pady=10)
+
         button = tk.Button(self, text="Wyjdź z aplikacji", font=controller.main_font,
                            command=btn_pressed)
         button.pack()
 
     def update(self):
-        """TODO: Uaktualnij dane na stronie"""
-        pass
+        automat = self.controller.automat
+        if automat.moze_wydac:
+            self.label.config(text="Dziękujemy")
+        else:
+            self.label.config(text="Tylko odliczona kwota")
 
     def reset(self):
         """TODO: Zresetuj stronę do stanu początkowego"""

@@ -3,7 +3,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 GROSZ = Decimal('.01')
 LISTA_NOMINALOW = ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5','10','20','50']
-OBSLUGIWANE_NOMINALY = tuple([Decimal(x) for x in LISTA_NOMINALOW]) 
+OBSLUGIWANE_NOMINALY = tuple([Decimal(x) for x in LISTA_NOMINALOW])
 
 
 class Error(Exception): 
@@ -175,6 +175,7 @@ class Automat(PrzechowywaczMonet):
         self.wartosc_wrzuconych = Decimal('0')
         self.liczba_biletow = 6      #liczba rodzai biletów
         self.wybrane_bilety = [0]*self.liczba_biletow
+        self.moze_wydac = False
 
     def reset(self):
         """Resetuje atrybuty do wartości domyślnych"""
@@ -182,6 +183,7 @@ class Automat(PrzechowywaczMonet):
         self.wartosc_wrzuconych = Decimal('0')
         self._monety.clear()
         self.wybrane_bilety = [0]*self.liczba_biletow
+        self.moze_wydac = False
 
     def dodaj_monete(self, moneta):
         """Dodaje monetę do listy _monety.
@@ -274,7 +276,9 @@ class Automat(PrzechowywaczMonet):
                 self.dodaj_monete(m)
             wydane_monety.clear()
             return self.zwroc_pieniadze()
-        return wydane_monety
+        else:
+            self.moze_wydac = True
+            return wydane_monety
 
     def zwroc_pieniadze(self):
         """Zwróć wszystkie monety
