@@ -349,6 +349,7 @@ class PageTwo(tk.Frame):
         button.pack()
 
     def update(self):
+        """Uaktualnij dane na stronie"""
         automat = self.controller.automat
         if automat.moze_wydac:
             self.label.config(text="Dziękujemy")

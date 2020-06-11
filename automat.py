@@ -163,6 +163,7 @@ class Automat(PrzechowywaczMonet):
         liczba_biletow: int, liczba rodzai dostępnych biletów.
         wybrane_bilety: list, zawiera liczby int określające liczbę biletów, jakie
             zostały wybrane przez użytkownika, dla każdego rodzaju.
+        moze_wydac: bool, domyślnie False
     """
 
     OBSLUGIWANA_WALUTA = 'PLN'
