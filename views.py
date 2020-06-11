@@ -262,6 +262,7 @@ class PageOne(tk.Frame):
             print(f'Automat zwrócił:\n{automat.zwroc_pieniadze()}')
             lb_wartosc_wrzuconych.config(text=f'Wrzucono: {automat.wartosc_wrzuconych:.2f}')
             self.update()
+            print(automat.suma_monet())
 
         wybrany_nominal = 0
         coin_btns = []

@@ -132,8 +132,7 @@ class PrzechowywaczMonet:
             Suma monet w liście.
         """
         suma = Decimal('0')
-        for m in self._monety:
-            suma += m.nominal
+        suma = sum(m.nominal for m in self._monety)
         return suma
 
     def zwroc_monete(self, nominal):
@@ -351,8 +350,8 @@ class Automat(PrzechowywaczMonet):
                         print(err.msg)
                         raise err
                     else:
-                        for i in range(liczba):
-                            m = Moneta(nominal, waluta)
+                        monety = [Moneta(nominal, waluta) for x in range(liczba)]
+                        for m in monety:
                             wczytane_monety.append(m)
         except ListaMonetException as err:
             print('błąd wczytywania')
