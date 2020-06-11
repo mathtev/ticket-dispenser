@@ -12,6 +12,7 @@ class AutomatTest(unittest.TestCase):
         self.automat = aut.Automat(aut.OBSLUGIWANE_NOMINALY)
         self.automat.wczytaj_monety('PLN')
 
+    # Bilet kupiony za odliczoną kwotę - oczekiwany brak reszty.
     def test_odliczona_kwota_zwroc_pusta_tablice(self):
 
         self.automat.do_zaplaty = Decimal('5.11')
@@ -26,7 +27,7 @@ class AutomatTest(unittest.TestCase):
         
         self.assertEqual(self.automat.wydaj_reszte(), [])
 
-
+    # Bilet kupiony płacąc więcej - oczekiwana reszta.
     def test_wplacono_wiecej_moze_zwrocic(self):
 
         Moneta = aut.Moneta
@@ -46,7 +47,9 @@ class AutomatTest(unittest.TestCase):
   
         self.assertEqual(do_sprawdzenia, spodziewany_wynik)
     
-
+    # Bilet kupiony płacąc więcej, automat nie ma jak wydać reszty - oczekiwana 
+    # informacja o błędzie oraz zwrócenie takiej samej liczby monet o tych samych nominałach,
+    # co wrzucone.
     def test_wplacono_wiecej_nie_moze_zwrocic(self):
 
         Moneta = aut.Moneta
@@ -68,7 +71,9 @@ class AutomatTest(unittest.TestCase):
         #self.assertRaises(aut.nieMoznaZwrocicMonetException, self.automat.wydaj_reszte)
         self.assertEqual(do_sprawdzenia, spodziewany_wynik)
 
-
+    # Zakup biletu płacąc po 1gr - suma stu monet 1gr ma być równa 1zł (dla floatów
+    # suma sto razy 0.01+0.01+...+0.01 nie będzie równa 1.0). Płatności można dokonać
+    # za pomocą pętli for w interpreterze.
     def test_100_monet_1_grosz_zwraca_1_zl(self):
 
         Moneta = aut.Moneta
@@ -82,7 +87,7 @@ class AutomatTest(unittest.TestCase):
 
         self.assertEqual(do_sprawdzenia, spodziewany_wynik)
 
-    
+    # Zakup dwóch różnych biletów naraz - cena powinna być sumą.
     def test_zakup_dwoch_biletow_cena_jest_suma(self):
 
         self.automat.dodaj_bilet(0) #2.40 zl
@@ -93,7 +98,9 @@ class AutomatTest(unittest.TestCase):
 
         self.assertEqual(do_sprawdzenia, spodziewany_wynik)
 
-
+    # Dodanie biletu, wrzucenie kilku monet, dodanie drugiego biletu, wrzucenie
+    # pozostałych monet, zakup za odliczoną kwotę - oczekiwany brak reszty
+    # (wrzucone monety nie zerują się po dodaniu biletu).
     def test_dodawanie_biletu_monet_na_przemian(self):
 
         Moneta = aut.Moneta
@@ -120,7 +127,8 @@ class AutomatTest(unittest.TestCase):
 
         self.assertEqual(self.automat.wydaj_reszte(), [])
 
-    
+    # Próba wrzucenia ujemnej oraz niecałkowitej liczby monet (oczekiwany komunikat
+    # o błędzie).
     def test_podanie_nieodpowiedniej_liczby_monet(self):
 
         # wartość wprowadzona przez użytkownika jest stringiem
