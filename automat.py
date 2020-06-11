@@ -3,7 +3,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 GROSZ = Decimal('.01')
 LISTA_NOMINALOW = ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5','10','20','50']
-OBSLUGIWANE_NOMINALY = tuple([Decimal(x) for x in LISTA_NOMINALOW])
+OBSLUGIWANE_NOMINALY = tuple([Decimal(x) for x in LISTA_NOMINALOW]) 
 
 
 class Error(Exception): 
